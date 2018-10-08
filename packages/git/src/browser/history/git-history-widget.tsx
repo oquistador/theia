@@ -275,16 +275,10 @@ export class GitHistoryWidget extends GitNavigableListWidget<GitHistoryListNode>
             const path = this.relativePath(this.options.uri);
             return <div className='diff-header'>
                 {
-                    path.length > 0 ?
-                        <div className='header-row'>
-                            <div className='theia-header'>
-                                path:
-                                </div>
-                            <div className='header-value'>
-                                {'/' + path}
-                            </div>
-                        </div>
-                        : ''
+                    this.renderHeaderRow({ name: 'repository', value: this.getRepositoryLabel(this.options.uri) })
+                }
+                {
+                    this.renderHeaderRow({ name: 'path', value: path })
                 }
                 <div className='theia-header'>
                     Commits

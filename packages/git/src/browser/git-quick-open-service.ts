@@ -287,7 +287,7 @@ export class GitQuickOpenService {
         const repository = repo || this.getRepository();
         if (repository) {
             const result = await this.git.exec(repository, ['tag', '--sort=-creatordate']);
-            return result.stdout.trim().split('\n').map(tag => ({ name: tag }));
+            return result.stdout !== '' ? result.stdout.trim().split('\n').map(tag => ({ name: tag })) : [];
         }
         return [];
     }
