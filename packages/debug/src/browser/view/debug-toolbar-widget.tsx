@@ -24,14 +24,14 @@ import { DEBUG_COMMANDS } from '../debug-command';
 import { BaseWidget } from '@theia/core/lib/browser/widgets';
 import { Disposable } from '@theia/core';
 import { DebugSessionManager } from '../debug-session';
-import { DebugWidgetContext, DebugWidget } from './debug-view-common';
+import { DebugContext, DebugWidget } from './debug-view-common';
 import { DisposableCollection } from '@theia/core';
 
 /**
  * Debug toolbar.
  */
 export class DebugToolBar extends BaseWidget implements DebugWidget {
-    private _debugContext: DebugWidgetContext | undefined;
+    private _debugContext: DebugContext | undefined;
     protected toolbarContainer: HTMLElement;
 
     private readonly sessionDisposableEntries = new DisposableCollection();
@@ -56,11 +56,11 @@ export class DebugToolBar extends BaseWidget implements DebugWidget {
         super.dispose();
     }
 
-    get debugContext(): DebugWidgetContext | undefined {
+    get debugContext(): DebugContext | undefined {
         return this._debugContext;
     }
 
-    set debugContext(debugContext: DebugWidgetContext | undefined) {
+    set debugContext(debugContext: DebugContext | undefined) {
         this.sessionDisposableEntries.dispose();
         this._debugContext = debugContext;
         this.id = this.createId();
@@ -72,6 +72,8 @@ export class DebugToolBar extends BaseWidget implements DebugWidget {
 
             this.sessionDisposableEntries.push(this.debugSessionManager.onDidDestroyDebugSession((debugSession: DebugSession) => this.onDebugSessionDestroyed(debugSession)));
         }
+
+        this.update();
     }
 
     protected onDebugSessionDestroyed(debugSession: DebugSession) {

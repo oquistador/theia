@@ -26,14 +26,14 @@ import { BreakpointsManager } from '../breakpoint/breakpoint-manager';
 import { ExtDebugProtocol } from '../../common/debug-common';
 import { DebugUtils } from '../debug-utils';
 import { Disposable } from '@theia/core';
-import { DebugStyles, DebugWidget, DebugWidgetContext } from './debug-view-common';
+import { DebugStyles, DebugWidget, DebugContext } from './debug-view-common';
 
 /**
  * Is it used to display breakpoints.
  */
 @injectable()
 export class DebugBreakpointsWidget extends VirtualWidget implements DebugWidget {
-    private _debugContext: DebugWidgetContext | undefined;
+    private _debugContext: DebugContext | undefined;
     private readonly onDidClickBreakpointEmitter = new Emitter<ExtDebugProtocol.AggregatedBreakpoint>();
     private readonly onDidDblClickBreakpointEmitter = new Emitter<ExtDebugProtocol.AggregatedBreakpoint>();
     private readonly sessionDisposableEntries = new DisposableCollection();
@@ -44,7 +44,7 @@ export class DebugBreakpointsWidget extends VirtualWidget implements DebugWidget
 
         this.addClass('theia-debug-entry');
         this.node.setAttribute('tabIndex', '0');
-        this.id = 'debug-breakpoints';
+        this.id = this.createId();
     }
 
     @postConstruct()
@@ -57,14 +57,14 @@ export class DebugBreakpointsWidget extends VirtualWidget implements DebugWidget
         super.dispose();
     }
 
-    get debugContext(): DebugWidgetContext | undefined {
+    get debugContext(): DebugContext | undefined {
         return this._debugContext;
     }
 
-    set debugContext(debugContext: DebugWidgetContext | undefined) {
+    set debugContext(debugContext: DebugContext | undefined) {
         this.sessionDisposableEntries.dispose();
         this._debugContext = debugContext;
-        this.id = 'debug-breakpoints' + (this.debugSession ? `-${this.debugSession.sessionId}` : '');
+        this.id = this.createId();
 
         if (this.debugSession) {
             const configurationDoneListener = () => this.refreshBreakpoints();
@@ -149,6 +149,10 @@ export class DebugBreakpointsWidget extends VirtualWidget implements DebugWidget
 
     private get debugSession(): DebugSession | undefined {
         return this._debugContext && this._debugContext.debugSession;
+    }
+
+    private createId() {
+        return 'debug-breakpoints' + (this.debugSession ? `-${this.debugSession.sessionId}` : '');
     }
 }
 

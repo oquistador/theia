@@ -36,7 +36,7 @@ import { DebugSelection } from '../view/debug-selection-service';
 import { ExtDebugProtocol } from '../../common/debug-common';
 import * as React from 'react';
 import { Disposable } from '@theia/core';
-import { DebugWidget, DebugWidgetContext } from './debug-view-common';
+import { DebugWidget, DebugContext } from './debug-view-common';
 import { DisposableCollection } from '@theia/core';
 
 /**
@@ -44,7 +44,7 @@ import { DisposableCollection } from '@theia/core';
  */
 @injectable()
 export class DebugVariablesWidget extends TreeWidget implements DebugWidget {
-    private _debugContext: DebugWidgetContext | undefined;
+    private _debugContext: DebugContext | undefined;
     private readonly sessionDisposableEntries = new DisposableCollection();
 
     constructor(
@@ -65,11 +65,11 @@ export class DebugVariablesWidget extends TreeWidget implements DebugWidget {
         super.dispose();
     }
 
-    get debugContext(): DebugWidgetContext | undefined {
+    get debugContext(): DebugContext | undefined {
         return this._debugContext;
     }
 
-    set debugContext(debugContext: DebugWidgetContext | undefined) {
+    set debugContext(debugContext: DebugContext | undefined) {
         this.sessionDisposableEntries.dispose();
         this._debugContext = debugContext;
         this.id = this.createId();

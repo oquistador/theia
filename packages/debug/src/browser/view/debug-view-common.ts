@@ -28,10 +28,10 @@ export namespace DebugStyles {
  * It allows to reuse the widget for different debug session.
  */
 export interface DebugWidget extends Widget {
-    debugContext: DebugWidgetContext | undefined;
+    debugContext: DebugContext | undefined;
 }
 
-export interface DebugWidgetContext {
+export interface DebugContext {
     debugSession: DebugSession;
     debugSelection: DebugSelection;
 }

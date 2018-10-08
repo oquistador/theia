@@ -23,14 +23,14 @@ import { DEBUG_SESSION_THREAD_CONTEXT_MENU } from '../debug-command';
 import { DebugSelection } from './debug-selection-service';
 import { DebugUtils } from '../debug-utils';
 import { Disposable, DisposableCollection } from '@theia/core';
-import { DebugStyles, DebugWidget, DebugWidgetContext } from './debug-view-common';
+import { DebugStyles, DebugWidget, DebugContext } from './debug-view-common';
 
 /**
  * Is it used to display list of threads.
  */
 @injectable()
 export class DebugThreadsWidget extends VirtualWidget implements DebugWidget {
-    private _debugContext: DebugWidgetContext | undefined;
+    private _debugContext: DebugContext | undefined;
     private _threads: DebugProtocol.Thread[] = [];
 
     private readonly sessionDisposableEntries = new DisposableCollection();
@@ -48,11 +48,11 @@ export class DebugThreadsWidget extends VirtualWidget implements DebugWidget {
         super.dispose();
     }
 
-    get debugContext(): DebugWidgetContext | undefined {
+    get debugContext(): DebugContext | undefined {
         return this._debugContext;
     }
 
-    set debugContext(debugContext: DebugWidgetContext | undefined) {
+    set debugContext(debugContext: DebugContext | undefined) {
         this.sessionDisposableEntries.dispose();
         this._debugContext = debugContext;
         this.id = this.createId();

@@ -32,7 +32,7 @@ import { DebugBreakpointsWidget } from './debug-breakpoints-widget';
 import { DebugVariablesWidget } from './debug-variables-widget';
 import { ExtDebugProtocol } from '../../common/debug-common';
 import { Disposable } from '@theia/core';
-import { DebugStyles, DebugWidget, DebugWidgetContext, DebugWidgetOptions } from './debug-view-common';
+import { DebugStyles, DebugWidget, DebugContext, DebugWidgetOptions } from './debug-view-common';
 import { DebugToolBar } from './debug-toolbar-widget';
 import { DebugSelectionService } from './debug-selection-service';
 import { DisposableCollection } from '@theia/core';
@@ -48,7 +48,7 @@ export const DEBUG_FACTORY_ID = 'debug';
 export class DebugPanelWidget extends BaseWidget implements DebugWidget, StatefulWidget {
     readonly panelId: string;
 
-    private _debugContext: DebugWidgetContext | undefined;
+    private _debugContext: DebugContext | undefined;
     private readonly sessionDisposableEntries = new DisposableCollection();
     private readonly HORIZONTALS_IDS = ['theia-bottom-content-panel', 'theia-main-content-panel'];
     private readonly widgets: DebugWidget[];
@@ -64,7 +64,7 @@ export class DebugPanelWidget extends BaseWidget implements DebugWidget, Statefu
     ) {
         super();
 
-        this.id = 'debug-panel';
+        this.id = this.createId();
         this.title.closable = true;
         this.title.iconClass = 'fa debug-tab-icon';
         this.panelId = options.panelId;
@@ -77,18 +77,18 @@ export class DebugPanelWidget extends BaseWidget implements DebugWidget, Statefu
         super.dispose();
     }
 
-    get debugContext(): DebugWidgetContext | undefined {
+    get debugContext(): DebugContext | undefined {
         return this._debugContext;
     }
 
-    set debugContext(debugContext: DebugWidgetContext | undefined) {
+    set debugContext(debugContext: DebugContext | undefined) {
         this.sessionDisposableEntries.dispose();
         this._debugContext = debugContext;
+        this.id = this.createId();
 
         if (debugContext) {
             const debugSession = debugContext.debugSession;
 
-            this.id = `debug-panel-${debugSession.sessionId}`;
             this.title.label = debugSession.configuration.name;
             this.title.caption = debugSession.configuration.name;
 
@@ -132,6 +132,10 @@ export class DebugPanelWidget extends BaseWidget implements DebugWidget, Statefu
     protected onActivateRequest(msg: Message): void {
         super.onActivateRequest(msg);
         this.widgets.forEach(w => w.activate());
+    }
+
+    private createId(): string {
+        return this.id = 'debug-panel' + (this.debugContext ? `${this.debugContext.debugSession.sessionId}` : '');
     }
 
     storeState(): object {
