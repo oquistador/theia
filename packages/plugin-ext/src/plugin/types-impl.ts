@@ -18,7 +18,6 @@ import { illegalArgument } from '../common/errors';
 import * as theia from '@theia/plugin';
 import URI from 'vscode-uri';
 import { relative } from '../common/paths-util';
-import { isMarkdownString } from './type-converters';
 import { startsWithIgnoreCase } from '../common/strings';
 
 export class Disposable {
@@ -511,36 +510,6 @@ export class SnippetString {
     }
 }
 
-export class MarkdownString {
-
-    value: string;
-    isTrusted?: boolean;
-
-    constructor(value?: string) {
-        this.value = value || '';
-    }
-
-    appendText(value: string): MarkdownString {
-        // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
-        this.value += value.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&');
-        return this;
-    }
-
-    appendMarkdown(value: string): MarkdownString {
-        this.value += value;
-        return this;
-    }
-
-    appendCodeblock(code: string, language: string = ''): MarkdownString {
-        this.value += '\n```';
-        this.value += language;
-        this.value += '\n';
-        this.value += code;
-        this.value += '\n```\n';
-        return this;
-    }
-}
-
 export class ThemeColor {
     constructor(public id: string) {
     }
@@ -848,6 +817,47 @@ export class SignatureHelp {
     signatures: SignatureInformation[];
     activeSignature: number;
     activeParameter: number;
+}
+
+// tslint:disable-next-line:no-any
+function isMarkdownString(thing: any): thing is MarkdownString {
+    if (thing instanceof MarkdownString) {
+        return true;
+    } else if (thing && typeof thing === 'object') {
+        return typeof (<MarkdownString>thing).value === 'string'
+            && (typeof (<MarkdownString>thing).isTrusted === 'boolean' || (<MarkdownString>thing).isTrusted === void 0);
+    }
+    return false;
+}
+
+export class MarkdownString {
+
+    value: string;
+    isTrusted?: boolean;
+
+    constructor(value?: string) {
+        this.value = value || '';
+    }
+
+    appendText(value: string): MarkdownString {
+        // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
+        this.value += value.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&');
+        return this;
+    }
+
+    appendMarkdown(value: string): MarkdownString {
+        this.value += value;
+        return this;
+    }
+
+    appendCodeblock(code: string, language: string = ''): MarkdownString {
+        this.value += '\n```';
+        this.value += language;
+        this.value += '\n';
+        this.value += code;
+        this.value += '\n```\n';
+        return this;
+    }
 }
 
 export class Hover {
