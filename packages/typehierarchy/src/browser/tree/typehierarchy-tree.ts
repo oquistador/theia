@@ -14,21 +14,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { NotificationType, VersionedTextDocumentIdentifier } from '../index';
+import { injectable } from 'inversify';
+import { TreeImpl } from '@theia/core/lib/browser/tree/tree';
 
-// NOTE: This module can be removed, once the semantic highlighting will become the part of the LSP.
-// https://github.com/Microsoft/vscode-languageserver-node/issues/368
+@injectable()
+export class TypeHierarchyTree extends TreeImpl {
 
-export interface SemanticHighlightingParams {
-    readonly textDocument: VersionedTextDocumentIdentifier;
-    readonly lines: SemanticHighlightingInformation[];
-}
-
-export interface SemanticHighlightingInformation {
-    readonly line: number;
-    readonly tokens?: string;
-}
-
-export namespace SemanticHighlight {
-    export const type = new NotificationType<SemanticHighlightingParams, void>('textDocument/semanticHighlighting');
 }

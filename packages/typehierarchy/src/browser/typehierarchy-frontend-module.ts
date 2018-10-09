@@ -13,22 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
+import { ContainerModule } from 'inversify';
+import { TypeHierarchyService } from './typehierarchy-service';
 
-import { NotificationType, VersionedTextDocumentIdentifier } from '../index';
+import '../../src/browser/style/index.css';
 
-// NOTE: This module can be removed, once the semantic highlighting will become the part of the LSP.
-// https://github.com/Microsoft/vscode-languageserver-node/issues/368
-
-export interface SemanticHighlightingParams {
-    readonly textDocument: VersionedTextDocumentIdentifier;
-    readonly lines: SemanticHighlightingInformation[];
-}
-
-export interface SemanticHighlightingInformation {
-    readonly line: number;
-    readonly tokens?: string;
-}
-
-export namespace SemanticHighlight {
-    export const type = new NotificationType<SemanticHighlightingParams, void>('textDocument/semanticHighlighting');
-}
+export default new ContainerModule(bind => {
+    bind(TypeHierarchyService).toSelf().inSingletonScope();
+});
