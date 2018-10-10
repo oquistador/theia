@@ -30,8 +30,8 @@ export class TypeHierarchyService {
      * `true` if the type hierarchy is supported for the given language. Otherwise, `false`.
      * It is always `false` for a given language unless the connection between the language client and the server has been established.
      */
-    isEnabledFor(languageId: string): boolean {
-        return this.subTypeFeatures.has(languageId) && this.superTypeFeatures.has(languageId);
+    isEnabledFor(languageId: string | undefined): boolean {
+        return !!languageId && this.subTypeFeatures.has(languageId) && this.superTypeFeatures.has(languageId);
     }
 
     createFeaturesFor(client: ILanguageClient & Readonly<{ languageId: string }>): [SubTypeHierarchyFeature, SuperTypeHierarchyFeature] {

@@ -25,13 +25,18 @@ export class TypeHierarchyTreeWidget extends TreeWidget {
     constructor(
         @inject(TreeProps) readonly props: TreeProps,
         @inject(TypeHierarchyTreeModel) readonly model: TypeHierarchyTreeModel,
-        @inject(ContextMenuRenderer) contextMenuRenderer: ContextMenuRenderer
+        @inject(ContextMenuRenderer) readonly contextMenuRenderer: ContextMenuRenderer
     ) {
         super(props, model, contextMenuRenderer);
+        this.id = TypeHierarchyTreeWidget.WIDGET_ID;
+        this.title.label = TypeHierarchyTreeWidget.WIDGET_LABEL;
+        this.title.caption = TypeHierarchyTreeWidget.WIDGET_LABEL;
+        this.title.closable = true;
     }
 
 }
 
 export namespace TypeHierarchyTreeWidget {
-    export const WIDGET_ID = '';
+    export const WIDGET_ID = 'theia-typehierarchy';
+    export const WIDGET_LABEL = 'Type Hierarchy';
 }
