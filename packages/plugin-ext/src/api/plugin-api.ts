@@ -39,6 +39,7 @@ import {
     DefinitionLink,
     DocumentLink
 } from './model';
+import {CancellationToken} from '@theia/plugin';
 
 export interface PluginInitData {
     plugins: PluginMetadata[];
@@ -306,6 +307,9 @@ export interface QuickOpenMain {
 
 export interface WorkspaceMain {
     $pickWorkspaceFolder(options: WorkspaceFolderPickOptionsMain): Promise<theia.WorkspaceFolder | undefined>;
+    $startFileSearch(includePattern: string, excludePatternOrDisregardExcludes: string | false,
+                     maxResults: number | undefined, token: CancellationToken): PromiseLike<UriComponents[]>;
+
 }
 
 export interface WorkspaceExt {

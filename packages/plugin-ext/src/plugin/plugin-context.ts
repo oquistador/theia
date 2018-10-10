@@ -77,6 +77,8 @@ import { TerminalServiceExtImpl } from './terminal-ext';
 import { LanguagesExtImpl, score } from './languages';
 import { fromDocumentSelector } from './type-converters';
 import { DialogsExtImpl } from './dialogs';
+import { GlobPattern} from '@theia/plugin';
+import { CancellationToken } from '@theia/core/lib/common/cancellation';
 
 export function createAPIFactory(rpc: RPCProtocol, pluginManager: PluginManager): PluginAPIFactory {
     const commandRegistryExt = rpc.set(MAIN_RPC_CONTEXT.COMMAND_REGISTRY_EXT, new CommandRegistryImpl(rpc));
@@ -277,6 +279,9 @@ export function createAPIFactory(rpc: RPCProtocol, pluginManager: PluginManager)
                 ignoreChangeEvents?: boolean,
                 ignoreDeleteEvents?: boolean): theia.FileSystemWatcher {
                 return workspaceExt.createFileSystemWatcher(globPattern, ignoreCreateEvents, ignoreChangeEvents, ignoreDeleteEvents);
+            },
+            findFiles(include: GlobPattern, exclude?: GlobPattern | undefined, maxResults?: number, token?: CancellationToken): PromiseLike<Uri[]> {
+                return workspaceExt.findFiles(include, undefined, maxResults, token);
             }
         };
 

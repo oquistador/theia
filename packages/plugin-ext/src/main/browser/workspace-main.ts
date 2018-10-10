@@ -19,11 +19,13 @@ import { WorkspaceExt, MAIN_RPC_CONTEXT, WorkspaceMain, WorkspaceFolderPickOptio
 import { RPCProtocol } from '../../api/rpc-protocol';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import Uri from 'vscode-uri';
-import { WorkspaceFoldersChangeEvent, WorkspaceFolder } from '@theia/plugin';
+import { UriComponents } from '../../common/uri-components';
+import { WorkspaceFoldersChangeEvent, WorkspaceFolder, CancellationToken } from '@theia/plugin';
 import { Path } from '@theia/core/lib/common/path';
 import { QuickOpenModel, QuickOpenItem, QuickOpenMode } from '@theia/core/lib/browser/quick-open/quick-open-model';
 import { MonacoQuickOpenService } from '@theia/monaco/lib/browser/monaco-quick-open-service';
 import { FileStat } from '@theia/filesystem/lib/common';
+import { FileSearchService } from '@theia/file-search/lib/common/file-search-service';
 
 export class WorkspaceMainImpl implements WorkspaceMain {
 
@@ -31,12 +33,15 @@ export class WorkspaceMainImpl implements WorkspaceMain {
 
     private quickOpenService: MonacoQuickOpenService;
 
+    private fileSearchService: FileSearchService;
+
     private roots: FileStat[];
 
     constructor(rpc: RPCProtocol, container: interfaces.Container) {
         this.proxy = rpc.getProxy(MAIN_RPC_CONTEXT.WORKSPACE_EXT);
         this.quickOpenService = container.get(MonacoQuickOpenService);
         const workspaceService = container.get(WorkspaceService);
+        this.fileSearchService = container.get(FileSearchService);
 
         workspaceService.roots.then(roots => {
             this.roots = roots;
@@ -125,4 +130,31 @@ export class WorkspaceMainImpl implements WorkspaceMain {
         });
     }
 
+    $startFileSearch(includePattern: string, excludePatternOrDisregardExcludes?: string | false,
+                     maxResults?: number, token?: CancellationToken): Promise<UriComponents[]> {
+        const uris: UriComponents[] = new Array();
+        let j = 0;
+        const promises: Promise<any>[] = new Array();
+        for (const root of this.roots) {
+            console.log('******** >> ' + root.uri);
+            promises[j++] = this.fileSearchService.find(includePattern, {rootUri: root.uri}).then(value => {
+                const paths: string[] = new Array();
+                let i = 0;
+                value.forEach(function (item) {
+                    let path: string;
+                    path = root.uri.endsWith('/') ? root.uri + item : root.uri + '/' + item;
+                    paths[i++] = path;
+                });
+                return Promise.resolve(paths);
+            });
+        }
+        return Promise.all(promises).then(value => {
+            let i = 0;
+                value.forEach(function (path) {
+                    // let path: string;
+                    uris[i++] = Uri.parse(path);
+                });
+            return Promise.resolve(uris);
+            });
+    }
 }
