@@ -14,10 +14,20 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 import { ContainerModule } from 'inversify';
+import { WidgetFactory } from '@theia/core/lib/browser/widget-manager';
+import { bindViewContribution } from '@theia/core/lib/browser/shell/view-contribution';
 import { TypeHierarchyService } from './typehierarchy-service';
+import { TypeHierarchyContribution } from './typehierarchy-contribution';
+import { TypeHierarchyTreeWidget } from './tree/typehierarchy-tree-widget';
+import { createHierarchyTreeWidget } from './tree/typehierarchy-tree-container';
 
 import '../../src/browser/style/index.css';
 
 export default new ContainerModule(bind => {
     bind(TypeHierarchyService).toSelf().inSingletonScope();
+    bindViewContribution(bind, TypeHierarchyContribution);
+    bind(WidgetFactory).toDynamicValue(context => ({
+        id: TypeHierarchyTreeWidget.WIDGET_ID,
+        createWidget: () => createHierarchyTreeWidget(context.container)
+    }));
 });

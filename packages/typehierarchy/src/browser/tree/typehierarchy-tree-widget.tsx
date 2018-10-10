@@ -32,6 +32,7 @@ export class TypeHierarchyTreeWidget extends TreeWidget {
         this.title.label = TypeHierarchyTreeWidget.WIDGET_LABEL;
         this.title.caption = TypeHierarchyTreeWidget.WIDGET_LABEL;
         this.title.closable = true;
+        this.title.iconClass = 'fa fa-sitemap';
     }
 
 }

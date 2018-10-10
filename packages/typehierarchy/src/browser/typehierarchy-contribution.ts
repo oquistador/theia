@@ -14,9 +14,9 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject } from 'inversify';
+import { injectable } from 'inversify';
 import { Command } from '@theia/core/lib/common/command';
-import { AbstractViewContribution } from '@theia/core/src/browser/shell/view-contribution';
+import { AbstractViewContribution } from '@theia/core/lib/browser/shell/view-contribution';
 import { TypeHierarchyTreeWidget } from './tree/typehierarchy-tree-widget';
 
 export namespace TypeHierarchyCommands {
@@ -36,7 +36,7 @@ export class TypeHierarchyContribution extends AbstractViewContribution<TypeHier
                 area: 'bottom'
             },
             toggleCommandId: TypeHierarchyCommands.TOGGLE_VIEW.id,
-            toggleKeybinding: 'ctrlcmd+shift+t'
+            toggleKeybinding: 'ctrlcmd+alt+h'
         });
     }
 

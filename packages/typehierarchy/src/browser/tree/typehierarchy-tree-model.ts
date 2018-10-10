@@ -23,4 +23,5 @@ export class TypeHierarchyTreeModel extends TreeModelImpl {
     protected doOpenNode(node: TreeNode): void {
         // do nothing (in particular do not expand the node)
     }
+
 }

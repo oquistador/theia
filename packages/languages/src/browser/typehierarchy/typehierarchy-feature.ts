@@ -17,14 +17,14 @@
 import { v4 } from 'uuid';
 import { DisposableCollection } from '@theia/core/lib/common/';
 import {
+    Disposable,
     ILanguageClient,
-    TextDocumentFeature,
-    TextDocumentRegistrationOptions,
-    TextDocumentPositionParams,
+    DocumentSelector,
     ClientCapabilities,
     ServerCapabilities,
-    Disposable,
-    DocumentSelector
+    TextDocumentFeature,
+    TextDocumentRegistrationOptions,
+    TextDocumentPositionParams
 } from '../index';
 import { TypeHierarchyMessageType, DocumentSymbolExt, SubTypesRequest, SuperTypesRequest } from './typehierarchy-protocol';
 
@@ -46,6 +46,7 @@ export abstract class TypeHierarchyFeature extends TextDocumentFeature<TextDocum
 
         super(client, options.messageType);
         this.languageId = client.languageId;
+        this.toDispose = new DisposableCollection();
     }
 
     fillClientCapabilities(capabilities: ClientCapabilities): void {
