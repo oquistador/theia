@@ -17,6 +17,7 @@
 import { inject, injectable } from 'inversify';
 import { v4 } from 'uuid';
 import { Location } from '@theia/editor/lib/browser/editor';
+import { SymbolKind } from '@theia/languages/lib/browser';
 import { TreeImpl, TreeNode, CompositeTreeNode, ExpandableTreeNode, SelectableTreeNode } from '@theia/core/lib/browser/tree';
 import { DocumentSymbolExt } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-protocol';
 import { TypeHierarchyFeature } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-feature';
@@ -114,16 +115,17 @@ export namespace TypeHierarchyTree {
 
     export interface Node extends CompositeTreeNode, ExpandableTreeNode, SelectableTreeNode {
         readonly location: Location;
+        readonly kind: SymbolKind;
         resolved: boolean;
     }
 
     export namespace Node {
 
         export function is(node: TreeNode | undefined): node is Node {
-            if (!!node && 'resolved' in node && 'location' in node) {
+            if (!!node && 'resolved' in node && 'location' in node && 'kind' in node) {
                 // tslint:disable-next-line:no-any
-                const { resolved, location } = (node as any);
-                return Location.is(location) && typeof resolved === 'boolean';
+                const { resolved, location, kind } = (node as any);
+                return Location.is(location) && typeof resolved === 'boolean' && typeof kind === 'number';
             }
             return false;
         }
@@ -133,6 +135,7 @@ export namespace TypeHierarchyTree {
             const { name } = symbol;
             const description = symbol.detail;
             const location = Location.create(symbol.uri, symbol.range);
+            const kind = symbol.kind;
             const children = symbol.children ? symbol.children.filter(DocumentSymbolExt.is).map(child => create(child, false)) : [];
             return {
                 id,
@@ -144,7 +147,8 @@ export namespace TypeHierarchyTree {
                 children,
                 expanded: false,
                 visible: true,
-                selected: false
+                selected: false,
+                kind
             };
         }
 

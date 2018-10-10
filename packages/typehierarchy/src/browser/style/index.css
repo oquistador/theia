@@ -13,3 +13,54 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
+
+ .theia-CallHierarchyTree {
+    font-size: var(--theia-ui-font-size1);
+    color: var(--theia-ui-font-color1);
+}
+
+.theia-CallHierarchyTree .theia-TreeNode {
+    width: 100%;
+}
+
+.theia-CallHierarchyTree .theia-ExpansionToggle {
+    min-width: 16px;
+}
+
+.theia-CallHierarchyTree .noCallers {
+    margin: 5px;
+}
+
+.theia-CallHierarchyTree .definitionNode {
+    display: flex;
+}
+
+.theia-CallHierarchyTree .definitionNode {
+    width: calc(100% - 32px);
+}
+
+.theia-CallHierarchyTree .definitionNode div {
+    margin-right: 5px;
+}
+
+.theia-CallHierarchyTree .definitionNode .symbol {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.theia-CallHierarchyTree .definitionNode .referenceCount {
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--theia-ui-font-color3);
+}
+
+.theia-CallHierarchyTree .definitionNode .container {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--theia-ui-font-color2);
+}
+
+.call-hierarchy-tab-icon::before {
+    content: "\f0ab"
+}
