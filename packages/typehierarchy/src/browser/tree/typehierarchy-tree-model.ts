@@ -17,6 +17,9 @@
 import { inject, injectable } from 'inversify';
 import { TreeNode } from '@theia/core/lib/browser/tree/tree';
 import { TreeModelImpl } from '@theia/core/lib/browser/tree/tree-model';
+import { Location } from '@theia/editor/lib/browser/editor';
+import { DocumentSymbolExt } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-protocol';
+import { TypeHierarchyFeature } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-feature';
 import { TypeHierarchyService } from '../typehierarchy-service';
 import { TypeHierarchyTree } from './typehierarchy-tree';
 
@@ -34,11 +37,18 @@ export class TypeHierarchyTreeModel extends TreeModelImpl {
         this.tree.root = undefined;
         const { selection, languageId, type } = options;
         if (languageId && selection) {
-            const types = 'subtype' === type ? this.typeHierarchyService.subTypes : this.typeHierarchyService.superTypes;
-            const symbol = await types(languageId, selection);
+            const symbol = await this.symbol(languageId, type, selection);
             if (symbol) {
                 this.tree.root = TypeHierarchyTree.Node.create(symbol, type);
             }
+        }
+    }
+
+    protected async symbol(languageId: string, type: TypeHierarchyFeature.TypeHierarchyType, selection: Location): Promise<DocumentSymbolExt | undefined> {
+        switch (type) {
+            case TypeHierarchyFeature.TypeHierarchyType.SUBTYPE: return this.typeHierarchyService.subTypes(languageId, selection);
+            case TypeHierarchyFeature.TypeHierarchyType.SUPERTYPE: return this.typeHierarchyService.superTypes(languageId, selection);
+            default: throw new Error(`Unexpected type hierarchy type: ${type}.`);
         }
     }
 

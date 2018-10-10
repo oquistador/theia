@@ -75,7 +75,7 @@ export class JavaClientContribution extends BaseLanguageClientContribution {
         const client: ILanguageClient & Readonly<{ languageId: string }> = Object.assign(super.createLanguageClient(connection), { languageId: this.id });
         client.registerFeatures([
             SemanticHighlightingService.createNewFeature(this.semanticHighlightingService, client),
-            ...this.typeHierarchyService.createFeaturesFor(client)
+            ...TypeHierarchyService.createNewFeatures(this.typeHierarchyService, client)
         ]);
         return client;
     }

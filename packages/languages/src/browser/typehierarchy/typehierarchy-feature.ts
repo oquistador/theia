@@ -15,7 +15,8 @@
  ********************************************************************************/
 
 import { v4 } from 'uuid';
-import { DisposableCollection } from '@theia/core/lib/common/';
+import { Emitter, Event } from '@theia/core/lib/common/event';
+import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import {
     Disposable,
     ILanguageClient,
@@ -23,8 +24,8 @@ import {
     ClientCapabilities,
     ServerCapabilities,
     TextDocumentFeature,
-    TextDocumentRegistrationOptions,
-    TextDocumentPositionParams
+    TextDocumentPositionParams,
+    TextDocumentRegistrationOptions
 } from '../index';
 import { TypeHierarchyMessageType, DocumentSymbolExt, SubTypesRequest, SuperTypesRequest } from './typehierarchy-protocol';
 
@@ -37,16 +38,19 @@ import { TypeHierarchyMessageType, DocumentSymbolExt, SubTypesRequest, SuperType
  */
 export abstract class TypeHierarchyFeature extends TextDocumentFeature<TextDocumentRegistrationOptions> {
 
-    protected readonly languageId: string;
-    protected readonly toDispose: DisposableCollection;
+    readonly languageId: string;
+
+    protected readonly onInitializedEmitter = new Emitter<void>();
+    protected readonly onDisposedEmitter = new Emitter<void>();
+    protected readonly toDispose = new DisposableCollection(this.onInitializedEmitter, this.onDisposedEmitter);
 
     protected constructor(
-        client: ILanguageClient & Readonly<{ languageId: string }>,
-        protected readonly options: TypeHierarchyFeature.Options) {
+        readonly client: ILanguageClient & Readonly<{ languageId: string }>,
+        readonly type: TypeHierarchyFeature.TypeHierarchyType,
+        protected readonly messageType: TypeHierarchyMessageType) {
 
-        super(client, options.messageType);
+        super(client, messageType);
         this.languageId = client.languageId;
-        this.toDispose = new DisposableCollection();
     }
 
     fillClientCapabilities(capabilities: ClientCapabilities): void {
@@ -65,7 +69,7 @@ export abstract class TypeHierarchyFeature extends TextDocumentFeature<TextDocum
         }
         const capabilitiesExt: ServerCapabilities & { typeHierarchy?: boolean } = capabilities;
         if (capabilitiesExt.typeHierarchy) {
-            this.toDispose.push(this.options.initializeCallback(this.languageId));
+            this.onInitializedEmitter.fire(undefined);
             const id = v4();
             this.register(this.messages, {
                 id,
@@ -74,9 +78,31 @@ export abstract class TypeHierarchyFeature extends TextDocumentFeature<TextDocum
         }
     }
 
+    dispose(): void {
+        this.onDisposedEmitter.fire(undefined);
+        super.dispose();
+    }
+
+    /**
+     * Performs the `textDocument/subTypes`/`textDocument/superTypes` LSP method invocations.
+     */
     async get(params: TextDocumentPositionParams): Promise<DocumentSymbolExt | undefined> {
-        const symbol = await this._client.sendRequest(this.options.messageType, params);
+        const symbol = await this._client.sendRequest(this.messageType, params);
         return DocumentSymbolExt.is(symbol) ? symbol : undefined;
+    }
+
+    /**
+     * Called when the feature is disposed.
+     */
+    get onDisposed(): Event<void> {
+        return this.onDisposedEmitter.event;
+    }
+
+    /**
+     * Called when the feature is initialized. The event fires only when the server set the `capabilitiesExt.typeHierarchy` to `true`.
+     */
+    get onInitialized(): Event<void> {
+        return this.onInitializedEmitter.event;
     }
 
     protected registerLanguageProvider(): Disposable {
@@ -87,29 +113,12 @@ export abstract class TypeHierarchyFeature extends TextDocumentFeature<TextDocum
 
 export namespace TypeHierarchyFeature {
 
-    export interface TypeHierarchyFeatureInitializeCallback {
-
-        /**
-         * Invoked when the connection between the client and the server has been established and the server send back
-         * the `typeHierarchy` `true` information, so that it supports super- and subtype hierarchies.
-         */
-        (languageId: string): Disposable;
-
-    }
-
-    export interface Options {
-
-        /**
-         * The RPC message type.
-         */
-        readonly messageType: TypeHierarchyMessageType;
-
-        /**
-         * Callback function invoked when the connection between the language client and the server has been established and the
-         * server set the `typeHierarchy` server capability to `true`.
-         */
-        readonly initializeCallback: TypeHierarchyFeature.TypeHierarchyFeatureInitializeCallback;
-
+    /**
+     * Enumeration of available type hierarchy types.
+     */
+    export enum TypeHierarchyType {
+        SUBTYPE = 'subtype',
+        SUPERTYPE = 'supertype'
     }
 
 }
@@ -119,14 +128,8 @@ export namespace TypeHierarchyFeature {
  */
 export class SuperTypeHierarchyFeature extends TypeHierarchyFeature {
 
-    constructor(
-        client: ILanguageClient & Readonly<{ languageId: string }>,
-        initializeCallback: TypeHierarchyFeature.TypeHierarchyFeatureInitializeCallback) {
-
-        super(client, {
-            messageType: SuperTypesRequest.type,
-            initializeCallback
-        });
+    constructor(readonly client: ILanguageClient & Readonly<{ languageId: string }>) {
+        super(client, TypeHierarchyFeature.TypeHierarchyType.SUPERTYPE, SuperTypesRequest.type);
     }
 
 }
@@ -136,14 +139,7 @@ export class SuperTypeHierarchyFeature extends TypeHierarchyFeature {
  */
 export class SubTypeHierarchyFeature extends TypeHierarchyFeature {
 
-    constructor(
-        client: ILanguageClient & Readonly<{ languageId: string }>,
-        initializeCallback: TypeHierarchyFeature.TypeHierarchyFeatureInitializeCallback) {
-
-        super(client, {
-            messageType: SubTypesRequest.type,
-            initializeCallback
-        });
+    constructor(readonly client: ILanguageClient & Readonly<{ languageId: string }>) {
+        super(client, TypeHierarchyFeature.TypeHierarchyType.SUBTYPE, SubTypesRequest.type);
     }
-
 }

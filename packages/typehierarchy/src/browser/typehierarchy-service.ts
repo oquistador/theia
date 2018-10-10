@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { injectable } from 'inversify';
-import { Disposable } from '@theia/core/lib/common/disposable';
+import { Disposable, DisposableCollection } from '@theia/core/lib/common/disposable';
 import { ILanguageClient, TextDocumentPositionParams, TextDocumentIdentifier, Position, Location, DocumentSymbol } from '@theia/languages/lib/browser';
 import { DocumentSymbolExt } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-protocol';
 import { SubTypeHierarchyFeature, SuperTypeHierarchyFeature, TypeHierarchyFeature } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-feature';
@@ -26,9 +26,36 @@ export class TypeHierarchyService implements Disposable {
     protected readonly subTypeFeatures = new Map<string, SubTypeHierarchyFeature>();
     protected readonly superTypeFeatures = new Map<string, SuperTypeHierarchyFeature>();
 
+    /**
+     * Registers the `newFeature` for the given language into this service. The `newFeature` will be removed from this service, when the feature is disposed.
+     * This method also makes sure that existing features for the given language (`languageId`) will be disposed before registering the new one.
+     */
+    register<T extends TypeHierarchyFeature>(newFeature: T): void {
+        const { type, languageId } = newFeature;
+        const toDisposeOnFeatureDispose = new DisposableCollection();
+        toDisposeOnFeatureDispose.push(newFeature.onInitialized(() => {
+            const features = this.features(type);
+            const oldFeature = features.get(languageId);
+            if (oldFeature) {
+                oldFeature.dispose();
+            }
+            features.set(languageId, newFeature);
+        }));
+        toDisposeOnFeatureDispose.push(newFeature.onDisposed(() => {
+            const features = this.features(type);
+            if (features.has(languageId)) {
+                features.get(languageId)!.dispose();
+            }
+            toDisposeOnFeatureDispose.dispose();
+        }));
+    }
+
+    /**
+     * Disposes the service.
+     */
     dispose(): void {
-        [this.subTypeFeatures, this.subTypeFeatures].forEach(map => map.forEach(feature => feature.dispose()));
-        [this.subTypeFeatures, this.subTypeFeatures].forEach(map => map.clear());
+        [this.subTypeFeatures, this.superTypeFeatures].forEach(map => map.forEach(feature => feature.dispose()));
+        [this.subTypeFeatures, this.superTypeFeatures].forEach(map => map.clear());
     }
 
     /**
@@ -37,15 +64,6 @@ export class TypeHierarchyService implements Disposable {
      */
     isEnabledFor(languageId: string | undefined): boolean {
         return !!languageId && this.subTypeFeatures.has(languageId) && this.superTypeFeatures.has(languageId);
-    }
-
-    /**
-     * Creates two, super- and subtype hierarchy language features for the client.
-     */
-    createFeaturesFor(client: ILanguageClient & Readonly<{ languageId: string }>): [SubTypeHierarchyFeature, SuperTypeHierarchyFeature] {
-        const subTypeFeature: SubTypeHierarchyFeature = new SubTypeHierarchyFeature(client, languageId => this.initFeature(languageId, subTypeFeature, this.subTypeFeatures));
-        const superTypeFeature: SubTypeHierarchyFeature = new SubTypeHierarchyFeature(client, languageId => this.initFeature(languageId, superTypeFeature, this.superTypeFeatures));
-        return [subTypeFeature, superTypeFeature];
     }
 
     /**
@@ -97,20 +115,14 @@ export class TypeHierarchyService implements Disposable {
     }
 
     /**
-     * Updates the `features` with the `newFeature`. Returns with a `Disposable` that will remove the `newFeature` from the `features` map
-     * if disposed. This method also makes sure that existing features for the given language (`languageId`) will be disposed before registering the new one.
+     * Returns with the features map for the give hierarchy type argument.
      */
-    protected initFeature<T extends TypeHierarchyFeature>(languageId: string, newFeature: T, features: Map<string, T>): Disposable {
-        const oldFeature = features.get(languageId);
-        if (oldFeature) {
-            oldFeature.dispose();
+    protected features(type: TypeHierarchyFeature.TypeHierarchyType): Map<string, TypeHierarchyFeature> {
+        switch (type) {
+            case TypeHierarchyFeature.TypeHierarchyType.SUBTYPE: return this.subTypeFeatures;
+            case TypeHierarchyFeature.TypeHierarchyType.SUPERTYPE: return this.superTypeFeatures;
+            default: throw new Error(`Unknown type hierarchy type: ${type}.`);
         }
-        features.set(languageId, newFeature);
-        return Disposable.create(() => {
-            if (features.has(languageId)) {
-                features.get(languageId)!.dispose();
-            }
-        });
     }
 
     // tslint:disable-next-line:no-any
@@ -120,6 +132,25 @@ export class TypeHierarchyService implements Disposable {
             && 'textDocument' in args
             && Position.is(args['position'])
             && TextDocumentIdentifier.is(args['textDocument']);
+    }
+
+}
+
+export namespace TypeHierarchyService {
+
+    /**
+     * Creates two new language features for handling the subtype and supertype hierarchies via the LSP.
+     * The new features will be registered into the type hierarchy `service`.
+     */
+    export function createNewFeatures(
+        service: TypeHierarchyService,
+        client: ILanguageClient & Readonly<{ languageId: string }>): [SubTypeHierarchyFeature, SuperTypeHierarchyFeature] {
+
+        const subtypeFeature = new SubTypeHierarchyFeature(client);
+        const supertypeFeature = new SuperTypeHierarchyFeature(client);
+        service.register(subtypeFeature);
+        service.register(supertypeFeature);
+        return [subtypeFeature, supertypeFeature];
     }
 
 }

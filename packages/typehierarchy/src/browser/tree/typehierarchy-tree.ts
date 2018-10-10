@@ -19,6 +19,7 @@ import { v4 } from 'uuid';
 import { TreeImpl, TreeNode, CompositeTreeNode } from '@theia/core/lib/browser/tree/tree';
 import { Location } from '@theia/editor/lib/browser/editor';
 import { DocumentSymbolExt } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-protocol';
+import { TypeHierarchyFeature } from '../../../../../node_modules/@theia/languages/src/browser/typehierarchy/typehierarchy-feature';
 
 @injectable()
 export class TypeHierarchyTree extends TreeImpl {
@@ -36,16 +37,14 @@ export class TypeHierarchyTree extends TreeImpl {
 
 export namespace TypeHierarchyTree {
 
-    export type Type = 'subtype' | 'supertype';
-
     export interface InitOptions {
-        readonly type: Type;
+        readonly type: TypeHierarchyFeature.TypeHierarchyType;
         readonly selection: Location | undefined;
         readonly languageId: string | undefined;
     }
 
     export interface Node extends CompositeTreeNode {
-        readonly type: Type;
+        readonly type: TypeHierarchyFeature.TypeHierarchyType;
         readonly location: Location;
         resolved?: boolean;
     }
@@ -61,7 +60,7 @@ export namespace TypeHierarchyTree {
             return false;
         }
 
-        export function create(symbol: DocumentSymbolExt, type: Type, resolved?: boolean): Node {
+        export function create(symbol: DocumentSymbolExt, type: TypeHierarchyFeature.TypeHierarchyType, resolved?: boolean): Node {
             const id = v4();
             const { name } = symbol;
             const description = symbol.detail;

@@ -25,14 +25,14 @@ function createHierarchyTreeContainer(parent: interfaces.Container): Container {
 
     child.unbind(TreeImpl);
     child.bind(TypeHierarchyTree).toSelf();
-    child.rebind(Tree).toService(TypeHierarchyTree);
+    child.rebind(Tree).toDynamicValue(ctx => ctx.container.get(TypeHierarchyTree));
 
     child.unbind(TreeModelImpl);
     child.bind(TypeHierarchyTreeModel).toSelf();
-    child.rebind(TreeModel).toService(TypeHierarchyTreeModel);
+    child.rebind(TreeModel).toDynamicValue(ctx => ctx.container.get(TypeHierarchyTreeModel));
 
     child.bind(TypeHierarchyTreeWidget).toSelf();
-    child.rebind(TreeWidget).toService(TypeHierarchyTreeWidget);
+    child.rebind(TreeWidget).toDynamicValue(ctx => ctx.container.get(TypeHierarchyTreeWidget));
 
     return child;
 }
