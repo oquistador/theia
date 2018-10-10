@@ -18,7 +18,7 @@ import { ContainerModule } from 'inversify';
 import { CommandContribution, MenuContribution } from '@theia/core/lib/common';
 import { OpenHandler, WidgetFactory, FrontendApplicationContribution, KeybindingContext, KeybindingContribution } from '@theia/core/lib/browser';
 import { VariableContribution } from '@theia/variable-resolver/lib/browser';
-import { EditorManager, EditorManagerAccess, ActiveEditorManagerAccess, CurrentEditorManagerAccess } from './editor-manager';
+import { EditorManager, EditorAccess, ActiveEditorAccess, CurrentEditorAccess } from './editor-manager';
 import { EditorContribution } from './editor-contribution';
 import { EditorMenuContribution } from './editor-menu';
 import { EditorCommandContribution } from './editor-command';
@@ -62,8 +62,8 @@ export default new ContainerModule(bind => {
 
     bind(SemanticHighlightingService).toSelf().inSingletonScope();
 
-    bind(CurrentEditorManagerAccess).toSelf().inSingletonScope();
-    bind(ActiveEditorManagerAccess).toSelf().inSingletonScope();
-    bind(EditorManagerAccess).to(CurrentEditorManagerAccess).inSingletonScope().whenTargetNamed(EditorManagerAccess.CURRENT);
-    bind(EditorManagerAccess).to(ActiveEditorManagerAccess).inSingletonScope().whenTargetNamed(EditorManagerAccess.ACTIVE);
+    bind(CurrentEditorAccess).toSelf().inSingletonScope();
+    bind(ActiveEditorAccess).toSelf().inSingletonScope();
+    bind(EditorAccess).to(CurrentEditorAccess).inSingletonScope().whenTargetNamed(EditorAccess.CURRENT);
+    bind(EditorAccess).to(ActiveEditorAccess).inSingletonScope().whenTargetNamed(EditorAccess.ACTIVE);
 });

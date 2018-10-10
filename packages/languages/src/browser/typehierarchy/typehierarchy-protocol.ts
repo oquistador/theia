@@ -31,7 +31,7 @@ export interface DocumentSymbolExt extends DocumentSymbol {
      * If not defined, it can be inferred from the context of the request. For example, when calling the `textDocument/documentSymbol`
      * method, the `DocumentUri` (`string`) can be inferred from the request parameter: `DocumentSymbolParams.textDocument.uri`.
      */
-    uri: string;
+    readonly uri: string;
 
 }
 

@@ -6,7 +6,9 @@
     "@theia/core": "^0.3.15",
     "@theia/editor": "^0.3.15",
     "@theia/languages": "^0.3.15",
-    "@theia/monaco": "^0.3.15"
+    "@theia/monaco": "^0.3.15",
+    "@types/uuid": "^3.4.3",
+    "uuid": "^3.2.1"
   },
   "publishConfig": {
     "access": "public"

@@ -18,6 +18,7 @@ import { inject, injectable } from 'inversify';
 import { TreeWidget, TreeProps } from '@theia/core/lib/browser/tree/tree-widget';
 import { ContextMenuRenderer } from '@theia/core/lib/browser/context-menu-renderer';
 import { TypeHierarchyTreeModel } from './typehierarchy-tree-model';
+import { TypeHierarchyTree } from './typehierarchy-tree';
 
 @injectable()
 export class TypeHierarchyTreeWidget extends TreeWidget {
@@ -33,6 +34,10 @@ export class TypeHierarchyTreeWidget extends TreeWidget {
         this.title.caption = TypeHierarchyTreeWidget.WIDGET_LABEL;
         this.title.closable = true;
         this.title.iconClass = 'fa fa-sitemap';
+    }
+
+    async initialize(options: TypeHierarchyTree.InitOptions): Promise<void> {
+        await this.model.initialize(options);
     }
 
 }

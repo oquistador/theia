@@ -140,7 +140,7 @@ export class EditorManager extends NavigatableWidgetOpenHandler<EditorWidget> {
  * Provides direct access to the underlying text editor.
  */
 @injectable()
-export abstract class EditorManagerAccess {
+export abstract class EditorAccess {
 
     @inject(EditorManager)
     protected readonly editorManager: EditorManager;
@@ -205,7 +205,7 @@ export abstract class EditorManagerAccess {
  * Provides direct access to the currently active text editor.
  */
 @injectable()
-export class CurrentEditorManagerAccess extends EditorManagerAccess {
+export class CurrentEditorAccess extends EditorAccess {
 
     protected editorWidget(): EditorWidget | undefined {
         return this.editorManager.currentEditor;
@@ -217,7 +217,7 @@ export class CurrentEditorManagerAccess extends EditorManagerAccess {
  * Provides access to the active text editor.
  */
 @injectable()
-export class ActiveEditorManagerAccess extends EditorManagerAccess {
+export class ActiveEditorAccess extends EditorAccess {
 
     protected editorWidget(): EditorWidget | undefined {
         return this.editorManager.activeEditor;
@@ -225,7 +225,7 @@ export class ActiveEditorManagerAccess extends EditorManagerAccess {
 
 }
 
-export namespace EditorManagerAccess {
+export namespace EditorAccess {
     export const CURRENT = 'current-editor-access';
     export const ACTIVE = 'active-editor-access';
 }
