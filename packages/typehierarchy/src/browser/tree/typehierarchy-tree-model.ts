@@ -39,7 +39,7 @@ export class TypeHierarchyTreeModel extends TreeModelImpl {
         if (languageId && selection) {
             const symbol = await this.symbol(languageId, type, selection);
             if (symbol) {
-                this.tree.root = TypeHierarchyTree.Node.create(symbol, type);
+                this.tree.root = TypeHierarchyTree.RootNode.create(symbol, languageId, type);
             }
         }
     }

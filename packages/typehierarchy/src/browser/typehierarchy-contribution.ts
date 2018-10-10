@@ -20,9 +20,9 @@ import { KeybindingRegistry } from '@theia/core/lib/browser/keybinding';
 import { Command, CommandRegistry } from '@theia/core/lib/common/command';
 import { EDITOR_CONTEXT_MENU } from '@theia/editor/lib/browser/editor-menu';
 import { EditorAccess } from '@theia/editor/lib/browser/editor-manager';
+import { TypeHierarchyFeature } from '@theia/languages/lib/browser/typehierarchy/typehierarchy-feature';
 import { AbstractViewContribution, OpenViewArguments } from '@theia/core/lib/browser/shell/view-contribution';
 import { TypeHierarchyTreeWidget } from './tree/typehierarchy-tree-widget';
-import { TypeHierarchyTree } from './tree/typehierarchy-tree';
 import { TypeHierarchyService } from './typehierarchy-service';
 
 @injectable()
@@ -61,7 +61,7 @@ export class TypeHierarchyContribution extends AbstractViewContribution<TypeHier
             execute: () => this.openView({
                 toggle: false,
                 activate: true,
-                type: 'subtype'
+                type: TypeHierarchyFeature.TypeHierarchyType.SUBTYPE
             }),
             isEnabled: this.isEnabled.bind(this)
         });
@@ -69,7 +69,7 @@ export class TypeHierarchyContribution extends AbstractViewContribution<TypeHier
             execute: () => this.openView({
                 toggle: false,
                 activate: true,
-                type: 'supertype'
+                type: TypeHierarchyFeature.TypeHierarchyType.SUPERTYPE
             }),
             isEnabled: this.isEnabled.bind(this)
         });
@@ -98,14 +98,14 @@ export class TypeHierarchyContribution extends AbstractViewContribution<TypeHier
         return this.typeHierarchyService.isEnabledFor(languageId);
     }
 
-    protected getType(args?: Partial<TypeHierarchyOpenViewArguments>): TypeHierarchyTree.Type {
-        return !!args && !!args.type ? args.type : 'subtype';
+    protected getType(args?: Partial<TypeHierarchyOpenViewArguments>): TypeHierarchyFeature.TypeHierarchyType {
+        return !!args && !!args.type ? args.type : TypeHierarchyFeature.TypeHierarchyType.SUBTYPE;
     }
 
 }
 
 export interface TypeHierarchyOpenViewArguments extends OpenViewArguments {
-    readonly type: TypeHierarchyTree.Type;
+    readonly type: TypeHierarchyFeature.TypeHierarchyType;
 }
 
 export namespace TypeHierarchyCommands {
@@ -116,12 +116,12 @@ export namespace TypeHierarchyCommands {
 
     export const OPEN_SUBTYPE: Command = {
         id: 'typehierarchy:open-subtype',
-        label: 'Open Subtype Hierarchy'
+        label: 'Subtype Hierarchy'
     };
 
     export const OPEN_SUPERTYPE: Command = {
         id: 'typehierarchy:open-supertype',
-        label: 'Open Supertype Hierarchy'
+        label: 'Supertype Hierarchy'
     };
 
 }
